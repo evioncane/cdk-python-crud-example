@@ -1,51 +1,45 @@
 
 # Welcome to your CDK Python project!
 
-This is a blank project for CDK development with Python.
+This is a project for kitten management.
 
-The `cdk.json` file tells the CDK Toolkit how to execute your app.
+## Steps to create the project
+1. Run: `cdk init --language python` to create project.
+2. Add `boto3` to `requirements.txt`.
+3. Run `pip install -r requirements.txt` to install dependencies.
+4. Create layer folder: `layer/python/`.
+5. Add DynamoDB shared code python file.
+6. Create CRUD handler functions in separate packages.
+7. Configure Stack.
 
-This project is set up like a standard Python project.  The initialization
-process also creates a virtualenv within this project, stored under the `.venv`
-directory.  To create the virtualenv it assumes that there is a `python3`
-(or `python` for Windows) executable in your path with access to the `venv`
-package. If for any reason the automatic creation of the virtualenv fails,
-you can create the virtualenv manually.
 
-To manually create a virtualenv on MacOS and Linux:
+### Create CRUD handler functions
+1. Write create kitten handler.
+2. Write list all kittens handler.
+3. Write get kitten handler.
+4. Write delete kitten handler.
 
-```
-$ python3 -m venv .venv
-```
-
-After the init process completes and the virtualenv is created, you can use the following
-step to activate your virtualenv.
-
-```
-$ source .venv/bin/activate
-```
-
-If you are a Windows platform, you would activate the virtualenv like this:
-
-```
-% .venv\Scripts\activate.bat
-```
-
-Once the virtualenv is activated, you can install the required dependencies.
-
-```
-$ pip install -r requirements.txt
-```
-
-At this point you can now synthesize the CloudFormation template for this code.
-
-```
-$ cdk synth
-```
-
-To add additional dependencies, for example other CDK libraries, just add
-them to your `setup.py` file and rerun the `pip install -r requirements.txt`
-command.
+### Configure Stack
+1. Create DynamoDB table
+    * Create key
+    * Create table
+2. Create a lambda layer. For the layer specify:
+    * id
+    * code
+    * compatible_runtimes
+    * description
+3. Create Lambda functions. For each Lambda function specify:
+    * id
+    * code
+    * handler
+    * environment
+    * runtime
+    * layers
+4. Grant all Lambda permission to access DynamoDB
+5. Create a REST API Gateway
+6. Create a Lambda integration
+7. Add resource and method
+    * For each resource add HTTP methods
 
 ## Useful commands
 
