@@ -17,48 +17,69 @@ class KittensStorageStack(Stack):
         partition_key = aws_dynamodb.Attribute(name="name", type=aws_dynamodb.AttributeType.STRING)
         kittens_table = aws_dynamodb.Table(self, "kitten_table", partition_key=partition_key)
 
+        # Create a lambda layer
+        db_layer = aws_lambda.LayerVersion(
+            self,
+            "DbLayer",
+            code=aws_lambda.Code.from_asset("layer"),
+            compatible_runtimes=[aws_lambda.Runtime.PYTHON_3_9],
+            description="DB Layer"
+        )
+
         # Create Lambda function
         kittens_add_function = aws_lambda.Function(
             self,
             id="KittenAddFunction",
-            code=aws_lambda.Code.from_asset("src"),
-            handler="handlers.kittens_handler.add_kitten",
-            runtime=aws_lambda.Runtime.PYTHON_3_9
+            code=aws_lambda.Code.from_asset("src/api/post"),
+            handler="add_kittens.handler",
+            environment={
+                "KITTENS_TABLE_NAME": kittens_table.table_name
+            },
+            runtime=aws_lambda.Runtime.PYTHON_3_9,
+            layers=[db_layer]
         )
 
         kittens_get_function = aws_lambda.Function(
             self,
             id="KittenGetFunction",
-            code=aws_lambda.Code.from_asset("src"),
-            handler="handlers.kittens_handler.get_kitten",
-            runtime=aws_lambda.Runtime.PYTHON_3_9
+            code=aws_lambda.Code.from_asset("src/api/get"),
+            handler="get_kittens.handler",
+            environment={
+                "KITTENS_TABLE_NAME": kittens_table.table_name
+            },
+            runtime=aws_lambda.Runtime.PYTHON_3_9,
+            layers=[db_layer]
         )
 
         kittens_list_function = aws_lambda.Function(
             self,
             id="KittenListFunction",
-            code=aws_lambda.Code.from_asset("src"),
-            handler="handlers.kittens_handler.list_kittens",
-            runtime=aws_lambda.Runtime.PYTHON_3_9
+            code=aws_lambda.Code.from_asset("src/api/list"),
+            handler="list_kittens.handler",
+            environment={
+                "KITTENS_TABLE_NAME": kittens_table.table_name
+            },
+            runtime=aws_lambda.Runtime.PYTHON_3_9,
+            layers=[db_layer]
         )
 
         kittens_delete_function = aws_lambda.Function(
             self,
             id="KittenDeleteFunction",
-            code=aws_lambda.Code.from_asset("src"),
-            handler="handlers.kittens_handler.delete_kitten",
-            runtime=aws_lambda.Runtime.PYTHON_3_9
+            code=aws_lambda.Code.from_asset("src/api/delete"),
+            handler="delete_kittens.handler",
+            environment={
+                "KITTENS_TABLE_NAME": kittens_table.table_name
+            },
+            runtime=aws_lambda.Runtime.PYTHON_3_9,
+            layers=[db_layer]
         )
-        kittens_add_function.add_environment("KITTENS_TABLE_NAME", kittens_table.table_name)
-        kittens_get_function.add_environment("KITTENS_TABLE_NAME", kittens_table.table_name)
-        kittens_list_function.add_environment("KITTENS_TABLE_NAME", kittens_table.table_name)
-        kittens_delete_function.add_environment("KITTENS_TABLE_NAME", kittens_table.table_name)
 
         # Grant Lambda permission to access DynamoDB
-        kittens_table.grant_read_write_data(kittens_add_function)
+        kittens_table.grant_write_data(kittens_add_function)
         kittens_table.grant_read_data(kittens_get_function)
         kittens_table.grant_read_data(kittens_list_function)
-        kittens_table.grant_read_write_data(kittens_delete_function)
+        kittens_table.grant_write_data(kittens_delete_function)
 
         # Create a REST API Gateway
         api = aws_apigateway.RestApi(
