@@ -3,15 +3,17 @@ import os
 
 import boto3
 
-KITTENS_TABLE_NAME = os.environ['KITTENS_TABLE_NAME']
+KITTENS_TABLE_NAME = os.environ.get("KITTENS_TABLE_NAME")
 dynamodb = boto3.resource("dynamodb")
 table = dynamodb.Table(KITTENS_TABLE_NAME)
 
 
 def add_kitten(event, context):
+    print(KITTENS_TABLE_NAME)
     print(event)
 
-    kitten = event["body"]
+    kitten = json.loads(event["body"])
+    print(kitten)
 
     item = table.put_item(
         Item=kitten
@@ -40,13 +42,13 @@ def get_kitten(event, context):
 
     kitten_name = path_parameters.get("name")
 
-    print(kitten_name)
-
-    kitten = table.get_item(
+    db_response = table.get_item(
         Key={
             "name": kitten_name,
         }
     )
+
+    kitten = db_response["Item"]
 
     print(f"After DB: {kitten}")
 
