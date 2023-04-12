@@ -26,7 +26,7 @@ class KittensStorageStack(Stack):
             description="DB Layer"
         )
 
-        # Create Lambda function
+        # Create Lambda functions
         kittens_add_function = aws_lambda.Function(
             self,
             id="KittenAddFunction",
